@@ -1,5 +1,6 @@
 import re
 
+
 def extract_boolean_function(verilog_code, module_name):
     # Find the module definition
     module_pattern = re.compile(r'module\s+' + re.escape(module_name) + r'\s*\(.*?\);(.*?)endmodule', re.DOTALL)
