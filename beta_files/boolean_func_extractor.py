@@ -1,56 +1,54 @@
 import re
 
 
-def extract_boolean_function(verilog_code, module_name):
-    # Find the module definition
-    module_pattern = re.compile(r'module\s+' + re.escape(module_name) + r'\s*\(.*?\);(.*?)endmodule', re.DOTALL)
-    module_match = module_pattern.search(verilog_code)
+def verilog_to_boolean(verilog_code, module_name):
+    # Extract the module instance connections
+    module_instance_pattern = re.compile(rf'\b{module_name}\s*\(\s*(.*?)\s*\);', re.DOTALL)
+    module_instance_match = module_instance_pattern.search(verilog_code)
 
-    if module_match:
-        module_body = module_match.group(1)
+    if module_instance_match:
+        # Extract module connections
+        connections = module_instance_match.group(1)
 
-        # Find input and output declarations
-        input_pattern = re.compile(r'input\s+(.*?);', re.DOTALL)
-        output_pattern = re.compile(r'output\s+(.*?);', re.DOTALL)
+        # Use re.findall to handle multiple inputs correctly
+        inputs_match = re.findall(r'\b(\w+)\s*,?', connections)
 
-        input_match = input_pattern.search(module_body)
-        output_match = output_pattern.search(module_body)
+        # The last match is the output
+        output = inputs_match[-1]
 
-        if input_match and output_match:
-            input_declaration = input_match.group(1)
-            output_declaration = output_match.group(1)
+        # Store the inputs
+        inputs = inputs_match[:-2]
 
-            # Extract input and output names
-            input_names = re.findall(r'\b\w+\b', input_declaration)
-            output_names = re.findall(r'\b\w+\b', output_declaration)
-
+        if inputs and output:
             # Create a Boolean function string
-            boolean_function = f'{", ".join(output_names)} = f({", ".join(input_names)});'
+            boolean_function = f'{", ".join(output)} = f({", ".join(inputs)});'
             return boolean_function
 
-    return None
+    else:
+        return None
 
-# Example usage
+# Example Verilog code
 verilog_code = """
 module MyModule (
     input A,
     input B,
     wire C,
-    Wire D,
+    wire D,
     output Y
 );
     AND2X(A,B,C);
     OR3X(A,B,C,D);
     NAND2X(A,D,Y);
-
 endmodule
 """
 
+# Specify the module name for which you want the boolean function
 module_name = "MyModule"
-boolean_function = extract_boolean_function(verilog_code, module_name)
+
+# Convert Verilog to boolean function
+boolean_function = verilog_to_boolean(verilog_code, module_name)
 
 if boolean_function:
-    print("Boolean Function:")
-    print(boolean_function)
+    print(f"The boolean function for {module_name} is: {boolean_function}")
 else:
-    print("Module not found or invalid Verilog code.")
+    print(f"No boolean function found for {module_name}")
