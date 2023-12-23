@@ -1,0 +1,1 @@
+gate_lib_json = "benchmark_ALL/resources/nangate_typical.json"
