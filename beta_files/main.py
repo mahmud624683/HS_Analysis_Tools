@@ -19,8 +19,8 @@ def extract_inputs_outputs(verilog_code):
 #method for creating node
 def create_node(name,node_type="",inputs=[],outputs=[],functn=""):
     new_node = Node(name, node_type)
-    new_node.input_list= inputs
-    new_node.output_list= outputs
+    new_node.append_inputlist(inputs)
+    new_node.append_outputlist(outputs)
     new_node.func = functn
     return new_node
 
@@ -60,7 +60,8 @@ def get_node_tree(code):
 
     for output in outputs: 
         output = output.strip()
-        node_dict[output+"_reg"] = create_node(output+"_reg","output")
+        node_dict[output+"_reg"] = create_node(output+"_reg","output",inputs=[output])
+        node_dict[output] = create_node(output,outputs=[output+"_reg"])
     
     #getting code inside the module
     code = re.search(r'module\s+(\w+)\s*\(([^)]*)\)\s*;([\s\S]*?)endmodule',code).group(3)
@@ -108,6 +109,53 @@ def get_node_tree(code):
     
     return node_dict
 
+#method to labeling the depth of backward nodes. those are found in input list.
+def backward_labeling(node_dict,key,visited_node):
+    depth = -1
+    if node_dict[key].node_type == 'input':
+        return 0
+    elif node_dict[key].depth>0:
+        return node_dict[key].depth
+    else:
+        for input in node_dict[key].input_list:
+            temp_depth = backward_labeling(node_dict,input)
+            if temp_depth>depth:
+                depth = temp_depth
+
+        node_dict[key].depth = depth
+        return depth
+            
+
+
+#method to labeling the depth of forward nodes. those are found in output list.
+def forward_labeling(node_dict,key,depth,visited_node):
+    init_depth = depth
+    #iterating over each node connected to the output of current nodes
+    for output in node_dict[key].output_list:
+        if node_dict[output].depth>0:
+            return 
+        else:
+            for input in node_dict[output].input_list:
+                temp_depth = backward_labeling(node_dict,input)
+                if temp_depth>depth:
+                    depth = temp_depth
+            
+            node_dict[key].depth = depth
+            for next_output in node_dict[output].output_list:
+                forward_labeling(node_dict,next_output,depth)
+
+
+    #checking whether it reached to the output pin or not    
+    if depth == init_depth:
+        node_dict[key].depth= depth+1
+
+
+#method for creating the labeling depth of the nodes
+def set_nodes_depth(node_dict):
+    for key in node_dict.keys():
+        if node_dict[key].node_type == 'input':
+            node_dict = forward_labeling(node_dict,key,0,[key])
+
     
 
 if __name__ == "__main__":
@@ -122,6 +170,6 @@ if __name__ == "__main__":
         print(f"An error occurred: {e}")
   
     gate_tree = get_node_tree(verilog_code)
-
+    set_nodes_depth(gate_tree)
     for key in gate_tree.keys():
         gate_tree[key].print_node()

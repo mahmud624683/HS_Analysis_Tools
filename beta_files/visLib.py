@@ -49,12 +49,13 @@ class Node:
         self._node_type = node_type
         self._input_list = []
         self._output_list = []
-        self._level = 0
+        self._depth = 0
         self._func = ""
 
     @property
     def name(self):
         return self._name
+
     @name.setter
     def name(self, value):
         self._name = value
@@ -62,23 +63,35 @@ class Node:
     @property
     def node_type(self):
         return self._node_type
+
     @node_type.setter
     def node_type(self, value):
         self._node_type = value
 
     @property
-    def level(self):
-        return self._level
-    @level.setter
-    def level(self, value):
-        self._level = value
+    def depth(self):
+        return self._depth
+
+    @depth.setter
+    def depth(self, value):
+        self._depth = value
     
     @property
     def func(self):
-        return self._func 
+        return self._func
+    
     @func.setter
     def func(self, value):
         self._func = value
+
+    @property
+    def input_list(self):
+        return self._input_list
+    
+    
+    @property
+    def output_list(self):
+        return self._output_list
 
     def add_input(self, input_node):
         self._input_list.append(input_node)
@@ -93,10 +106,10 @@ class Node:
         self._output_list += output_nodes
     
     def print_node(self):
-        print("name: ",self._name)
-        print("gate type: ",self._node_type)
-        print("input pins: ",self._input_list)
-        print("output pins: ",self._output_list)
-        print("function: ",self._func)
-        print("level: ",self._level)
+        print("name: ", self._name)
+        print("gate type: ", self._node_type)
+        print("input pins: ", self._input_list)
+        print("output pins: ", self._output_list)
+        print("function: ", self._func)
+        print("depth: ", self._depth)
         print("----------------------")
