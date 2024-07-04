@@ -54,7 +54,7 @@ def extract_output_expressions(verilog_file_path):
 
 verilog_file_path = 'E:\\Personal\\SAT_Solver\\verilog_file.v'
 outputs_expression, inputs = extract_output_expressions(verilog_file_path)
-inputs = list(itertools.product([0, 1], repeat=len(inputs)))
+inputs = list(itertools.product([True, False], repeat=len(inputs)))
 for inp in inputs:
     G1gat,G4gat,G8gat,G11gat,G14gat,G17gat,G21gat,G24gat,G27gat,G30gat,G34gat,G37gat,G40gat,G43gat,G47gat,G50gat,G53gat,G56gat,G60gat,G63gat,G66gat,G69gat,G73gat,G76gat,G79gat,G82gat,G86gat,G89gat,G92gat,G95gat,G99gat,G102gat,G105gat,G108gat,G112gat,G115gat = inp
     for output, expression in outputs_expression.items():
